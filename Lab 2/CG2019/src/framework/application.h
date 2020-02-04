@@ -12,14 +12,6 @@
 class Application
 {
     
-    typedef struct sParticle
-    {
-        float x;
-        float y;
-        unsigned int size;
-        Color color;
-    } Particle;
-    
 public:
 	//window
 	SDL_Window* window;
@@ -39,8 +31,6 @@ public:
 	int mouse_state; //tells which buttons are pressed
 	Vector2 mouse_position; //last mouse position
 	Vector2 mouse_delta; //mouse movement in the last frame
-    
-    Particle particles[100];
     
     
     enum { DEF_MODE, LINE_MODE, RECTANGLE_MODE, CIRCLE_MODE, CENTROID_MODE, GRADIENT1_MODE, GRADIENT2_MODE, ROTATE_MODE, RESIZE_MODE, GRAYSCALE_MODE, TRESHOLD_MODE, RESTART_MODE, PARTICLE_SNOW_MODE, PAINT_MODE };
@@ -76,8 +66,6 @@ public:
 	}
 
 	void start();
-    
-    void loadToolBar();
 };
 
 
