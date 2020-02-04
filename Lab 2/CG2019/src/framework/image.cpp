@@ -475,8 +475,9 @@ void Image::drawLineBresenham(int x0, int y0, int x1, int y1, Color & c)
         std::swap(x0, x1);
         std::swap(y0, y1);
     }
+    int sign = y0 < y1 ? 1 : -1;
     dx = x1 - x0;
-    dy = y1 - y0;
+    dy = (y1 - y0) * sign;
     // check if we are on the 2nd, 3rd, 6th or 7th octant
     if (dx >= dy)
     {
@@ -485,28 +486,42 @@ void Image::drawLineBresenham(int x0, int y0, int x1, int y1, Color & c)
     }
     else
     {
-        d = dy - 2 * dx;
+        d = 2 * dx - dy;
         incE = 2 * dx;
     }
     incNE = 2 * (dy - dx);
     x = x0;
     y = y0;
     setPixel(x, y, c);
-    while (x < x1)
+    while ( true )
     {
         
         if (d <= 0)
         {
-            x += 1;
+            if (dx >= dy)
+                x += 1;
+            else
+                y += 1 * sign;
             d += incE;
         }
         else
         {
             x += 1;
-            y = y + 1;
+            y += 1 * sign;
             d += incNE;
         }
         setPixel(x, y, c);
+        if (dx >= dy)
+        {
+            if(x == x1)
+                break;
+        }
+        else
+        {
+            if (y == y1)
+                break;
+        }
+            
     }
     
 }
