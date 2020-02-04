@@ -36,7 +36,8 @@ void Application::render( Image& framebuffer )
     if ( render_mode == LINE_MODE)
         // framebuffer.drawLineBresenham(random() % (int)window_width, random() % (int)(window_height - toolBar.height), random() % (int)window_width, random() % (int)window_height, defCol);
         framebuffer.drawLineDDA(250, 250, 100, 200, defCol);
-    framebuffer.drawLineBresenham(250, 250, 100, 200, defCol);
+    //framebuffer.drawLineBresenham(250, 250, 100, 200, defCol);
+    framebuffer.drawCircle(0, 0, 100, defCol, true);
     render_mode = DEF_MODE;
 }
 

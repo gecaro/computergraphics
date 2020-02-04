@@ -259,7 +259,7 @@ void Image::drawLineBresenham(int x0, int y0, int x1, int y1, Color & c)
 {
     int dx, dy, incE, incNE, d , x, y;
     // check if point 0 is greater
-    if( x0 > x1 )
+    if (x0 > x1)
     {
         std::swap(x0, x1);
         std::swap(y0, y1);
@@ -304,7 +304,7 @@ void Image::drawLineBresenham(int x0, int y0, int x1, int y1, Color & c)
         setPixel(x, y, c);
         if (dx >= dy)
         {
-            if(x == x1)
+            if (x == x1)
                 break;
         }
         else
@@ -313,6 +313,55 @@ void Image::drawLineBresenham(int x0, int y0, int x1, int y1, Color & c)
                 break;
         }
             
+    }
+    
+}
+
+void Image::drawCircleAux(int x, int y, int x0, int y0, Color &c, bool fill)
+{
+    if ( fill )
+    {
+        for (int i = x0 - x; i < x0 + x; i++)
+        {
+            setPixel(i, y0 + y, c);
+            setPixel(i, y0 - y, c);
+        }
+        for (int i = x0 - y; i < x0 + y; i++)
+        {
+            setPixel(i, y0 + x, c);
+            setPixel(i, y0 - x, c);
+        }
+    }
+    setPixel(x0 + x, y0 + y, c);
+    setPixel(x0 + x, y0 - y, c);
+    setPixel(x0 - x, y0 + y, c);
+    setPixel(x0 - x, y0 - y, c);
+    setPixel(x0 + y, y0 + x, c);
+    setPixel(x0 + y, y0 - x, c);
+    setPixel(x0 - y, y0 + x, c);
+    setPixel(x0 - y, y0 - x, c);
+}
+
+void Image::drawCircle(int x0, int y0, int r, Color & c, bool fill)
+{
+    int v, x, y;
+    x = 0;
+    y = r;
+    v = 1 - r;
+    drawCircleAux(x, y, x0, y0, c, fill);
+    while (y > x)
+    {
+        if (v < 0)
+        {
+            v += 2 * x + 3;
+        }
+        else
+        {
+            v += 2 * (x - y) + 5;
+            y--;
+        }
+        x++;
+        drawCircleAux(x, y, x0, y0, c, fill);
     }
     
 }

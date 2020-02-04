@@ -75,10 +75,12 @@ public:
     // primitives (LAB 2)
     void drawLineDDA(int x0, int y0, int x1, int y1, Color & c);
     void drawLineBresenham(int x0, int y0, int x1, int y1, Color & c);
+    void drawCircleAux(int x, int y, int x0, int y0, Color &c, bool fill);
+    void drawCircle(int x, int y, int r, Color & c, bool fill);
+    
     
     
     void drawRectangle( int start_x, int start_y, int w, int h, Color color, bool fill);
-    void drawCircle( int xCenter, int yCenter, int r, Color color, bool fill);
     void drawLine( int x1, int y1, int x2, int y2, Color color );
     
     void formulaCentroid();
