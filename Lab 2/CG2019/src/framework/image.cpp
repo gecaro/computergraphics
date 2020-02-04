@@ -483,13 +483,15 @@ void Image::drawLineBresenham(int x0, int y0, int x1, int y1, Color & c)
     {
         d = 2 * dy - dx;
         incE = 2 * dy;
+        incNE = 2 * (dy - dx);
     }
     else
     {
         d = 2 * dx - dy;
         incE = 2 * dx;
+        incNE = 2 * (dx - dy);
     }
-    incNE = 2 * (dy - dx);
+    
     x = x0;
     y = y0;
     setPixel(x, y, c);
