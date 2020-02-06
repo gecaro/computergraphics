@@ -86,7 +86,6 @@ public:
     void DDAwithTable(int x0, int y0, int x1, int y1, std::vector<sCelda> &table);
     void drawTriangle(int x0, int y0, int x1, int y1, int x2, int y2, Color & c, bool fill);
     void drawTriangleInterpolated(int x0, int y0, int x1, int y1, int x2, int y2, Color & c0, Color & c1, Color & c2);
-
     
     
     

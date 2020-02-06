@@ -417,6 +417,40 @@ void Image::drawTriangle(int x0, int y0, int x1, int y1, int x2, int y2, Color &
 void Image::drawTriangleInterpolated(int x0, int y0, int x1, int y1, int x2, int y2, Color & c0, Color & c1, Color & c2)
 {
     
+    std::vector<Celda> table;
+    table.resize(height);
+    Vector2 v0 = Vector2(x1, y1) - Vector2(x0, y0);
+    Vector2 v1 = Vector2(x2, y2) - Vector2(x0, y0);
+    float d00 = v0.dot(v0);
+    float d01 = v0.dot(v1);
+    float d11 = v1.dot(v1);
+    for (int i = 0; i < table.size(); i++)
+    {
+        table[i].maxX = INT_MIN;
+        table[i].minX = INT_MAX;
+    }
+    DDAwithTable(x0, y0, x1, y1, table);
+    DDAwithTable(x0, y0, x2, y2, table);
+    DDAwithTable(x1, y1, x2, y2, table);
+    for (int y = 0; y < table.size(); y++)
+    {
+        for (int x = table[y].minX; x < table[y].maxX; x++)
+        {
+            Vector2 v2 = Vector2(x, y) - Vector2(x1, y1);
+            //computing the dot of a vector with itself
+            //is the same as length*length but faster
+            float d20 = v2.dot(v0);
+            float d21 = v2.dot(v1);
+            float denom = d00 * d11 - d01 * d01;
+            float v = (d11 * d20 - d01 * d21) / denom;
+            float w = (d00 * d21 - d01 * d20) / denom;
+            float u = 1.0 - v - w;
+            Color finalColor = c0 * u + c1 * v + c2 * w;
+            //use weights to compute final color
+            setPixel(x, y, finalColor);
+        }
+    }
+
 }
 
 

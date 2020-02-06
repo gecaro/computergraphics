@@ -41,7 +41,11 @@ void Application::init(void)
 //render one frame
 void Application::render( Image& framebuffer )
 {
-    if ( render_mode == LINE_MODE && points.counter > 1){
+    if ( render_mode == LINE_MODE_DDA && points.counter > 1){
+        framebuffer.drawLineDDA(points.p1.x, points.p1.y, points.p2.x, points.p2.y, defCol);
+        points.counter = 0;
+    }
+    if ( render_mode == LINE_MODE_BRESENHAM && points.counter > 1){
         framebuffer.drawLineDDA(points.p1.x, points.p1.y, points.p2.x, points.p2.y, defCol);
         points.counter = 0;
     }
@@ -52,14 +56,21 @@ void Application::render( Image& framebuffer )
     if ( render_mode == TRIANGLE_MODE && points.counter > 2)
     {
         framebuffer.drawTriangle(points.p1.x, points.p1.y, points.p2.x, points.p2.y, points.p3.x, points.p3.y, defCol, fill);
+        points.counter = 0;
     }
-        
-        // framebuffer.drawLineBresenham(random() % (int)window_width, random() % (int)(window_height - toolBar.height), random() % (int)window_width, random() % (int)window_height, defCol);
-    //framebuffer.drawTriangle(10, 10, 100, 100, 200, 10, defCol, true);
-    //framebuffer.drawLineDDA(250, 250, 100, 200, defCol);
-    //framebuffer.drawLineBresenham(250, 250, 100, 200, defCol);
-    //framebuffer.drawCircle(0, 0, 100, defCol, true);
-    //render_mode = DEF_MODE;
+    if ( render_mode == TRIANGLE_INTERPOLATED_MODE && points.counter > 2)
+    {
+        Color red = Color::RED;
+        Color green = Color::GREEN;
+        Color blue = Color::BLUE;
+        framebuffer.drawTriangleInterpolated(points.p1.x, points.p1.y, points.p2.x, points.p2.y, points.p3.x, points.p3.y, red, green, blue);
+        points.counter = 0;
+    }
+    if ( render_mode == RESTART_MODE)
+    {
+        framebuffer.fill(Color::WHITE);
+        points.counter = 0;
+    }
 }
 
 //called after render
@@ -73,20 +84,26 @@ void Application::update(double seconds_elapsed)
 void Application::onKeyDown( SDL_KeyboardEvent event )
 {
 	//to see all the keycodes: https://wiki.libsdl.org/SDL_Keycode
-
+    points.counter = 0;
 	switch(event.keysym.scancode)
 	{
 		case SDL_SCANCODE_ESCAPE:
 			exit(0); 
 			break; //ESC key, kill the app
         case SDL_SCANCODE_1:
-            render_mode = LINE_MODE;
+            render_mode = LINE_MODE_DDA;
             break;
         case SDL_SCANCODE_2:
-            render_mode = CIRCLE_MODE;
+            render_mode = LINE_MODE_DDA;
             break;
         case SDL_SCANCODE_3:
+            render_mode = CIRCLE_MODE;
+            break;
+        case SDL_SCANCODE_4:
             render_mode = TRIANGLE_MODE;
+            break;
+        case SDL_SCANCODE_5:
+            render_mode = TRIANGLE_INTERPOLATED_MODE;
             break;
         case SDL_SCANCODE_F:
             fill = !fill;
@@ -118,7 +135,7 @@ void Application::onMouseButtonUp( SDL_MouseButtonEvent event )
 {
 	if (event.button == SDL_BUTTON_LEFT) //left mouse unpressed
 	{
-        if (render_mode == LINE_MODE || render_mode == CIRCLE_MODE)
+        if (render_mode == LINE_MODE_DDA || render_mode == CIRCLE_MODE || render_mode == LINE_MODE_BRESENHAM)
         {
             switch (points.counter) {
                 case 1:
@@ -133,7 +150,7 @@ void Application::onMouseButtonUp( SDL_MouseButtonEvent event )
                     break;
             }
         }
-        else if (render_mode == TRIANGLE_MODE)
+        else if (render_mode == TRIANGLE_MODE || render_mode == TRIANGLE_INTERPOLATED_MODE)
         {
            switch (points.counter) {
                case 1:

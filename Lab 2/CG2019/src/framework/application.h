@@ -42,7 +42,7 @@ public:
     Points points;
     bool fill;
     
-    enum { DEF_MODE, LINE_MODE, CIRCLE_MODE, TRIANGLE_MODE, RESTART_MODE };
+    enum { DEF_MODE, LINE_MODE_DDA, LINE_MODE_BRESENHAM, CIRCLE_MODE, TRIANGLE_MODE, TRIANGLE_INTERPOLATED_MODE, RESTART_MODE };
     int render_mode;
 
 	//constructor
