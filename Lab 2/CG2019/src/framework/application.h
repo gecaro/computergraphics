@@ -11,6 +11,13 @@
 
 class Application
 {
+    typedef struct sPoints
+    {
+        Vector2 p1;
+        Vector2 p2;
+        Vector3 p3;
+        int counter;
+    } Points;
     
 public:
 	//window
@@ -31,9 +38,11 @@ public:
 	int mouse_state; //tells which buttons are pressed
 	Vector2 mouse_position; //last mouse position
 	Vector2 mouse_delta; //mouse movement in the last frame
+
+    Points points;
+    bool fill;
     
-    
-    enum { DEF_MODE, LINE_MODE, RECTANGLE_MODE, CIRCLE_MODE, CENTROID_MODE, GRADIENT1_MODE, GRADIENT2_MODE, ROTATE_MODE, RESIZE_MODE, GRAYSCALE_MODE, TRESHOLD_MODE, RESTART_MODE, PARTICLE_SNOW_MODE, PAINT_MODE };
+    enum { DEF_MODE, LINE_MODE, CIRCLE_MODE, TRIANGLE_MODE, RESTART_MODE };
     int render_mode;
 
 	//constructor

@@ -27,6 +27,12 @@ class Image
 		unsigned int bpp; //bits per pixel
 		unsigned char* data; //bytes with the pixel information
 	} TGAInfo;
+    
+    typedef struct sCelda
+    {
+        int maxX;
+        int minX;
+    } Celda;
 
 
 public:
@@ -77,6 +83,10 @@ public:
     void drawLineBresenham(int x0, int y0, int x1, int y1, Color & c);
     void drawCircleAux(int x, int y, int x0, int y0, Color &c, bool fill);
     void drawCircle(int x, int y, int r, Color & c, bool fill);
+    void DDAwithTable(int x0, int y0, int x1, int y1, std::vector<sCelda> &table);
+    void drawTriangle(int x0, int y0, int x1, int y1, int x2, int y2, Color & c, bool fill);
+    void drawTriangleInterpolated(int x0, int y0, int x1, int y1, int x2, int y2, Color & c0, Color & c1, Color & c2);
+
     
     
     

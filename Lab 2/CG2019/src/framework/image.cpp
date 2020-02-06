@@ -366,6 +366,59 @@ void Image::drawCircle(int x0, int y0, int r, Color & c, bool fill)
     
 }
 
+void Image::DDAwithTable(int x0, int y0, int x1, int y1, std::vector<sCelda> &table)
+{
+    //fill values like a regular array
+    float d, x, y, vx, vy;
+    float dx = x1 - x0;
+    float dy = y1 - y0;
+    d = abs(dx) >= abs(dy) ? abs(dx) : abs(dy);
+    vx = dx / d;
+    vy = dy / d;
+    x = x0;
+    y = y0;
+    for (int i = 0; i < d; i++)
+    {
+        table[y].maxX = x > table[y].maxX ? x : table[y].maxX;
+        table[y].minX = x < table[y].minX ? x : table[y].minX;
+        x += vx;
+        y += vy;
+    }
+   
+}
+
+
+void Image::drawTriangle(int x0, int y0, int x1, int y1, int x2, int y2, Color & c, bool fill)
+{
+    if ( fill )
+    {
+        std::vector<Celda> table;
+        table.resize(height);
+        for (int i = 0; i < table.size(); i++)
+        {
+            table[i].maxX = INT_MIN;
+            table[i].minX = INT_MAX;
+        }
+        DDAwithTable(x0, y0, x1, y1, table);
+        DDAwithTable(x0, y0, x2, y2, table);
+        DDAwithTable(x1, y1, x2, y2, table);
+        for (int y = 0; y < table.size(); y++)
+            for (int x = table[y].minX; x < table[y].maxX; x++)
+                setPixel(x, y, c);
+    }
+    else
+    {
+        drawLineDDA(x0, y0, x1, y1, c);
+        drawLineDDA(x0, y0, x2, y2, c);
+        drawLineDDA(x1, y1, x2, y2, c);
+    }
+}
+
+void Image::drawTriangleInterpolated(int x0, int y0, int x1, int y1, int x2, int y2, Color & c0, Color & c1, Color & c2)
+{
+    
+}
+
 
 #ifndef IGNORE_LAMBDAS
 
