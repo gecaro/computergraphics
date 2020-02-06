@@ -47,8 +47,11 @@ void Application::render( Image& framebuffer )
     }
     if ( render_mode == CIRCLE_MODE && points.counter > 1){
         framebuffer.drawCircle(points.p1.x, points.p1.y, distance(points.p1, points.p2), defCol, fill);
-        //framebuffer.drawLineDDA(points.p1.x, points.p1.y, points.p2.x, points.p2.y, defCol);
         points.counter = 0;
+    }
+    if ( render_mode == TRIANGLE_MODE && points.counter > 2)
+    {
+        framebuffer.drawTriangle(points.p1.x, points.p1.y, points.p2.x, points.p2.y, points.p3.x, points.p3.y, defCol, fill);
     }
         
         // framebuffer.drawLineBresenham(random() % (int)window_width, random() % (int)(window_height - toolBar.height), random() % (int)window_width, random() % (int)window_height, defCol);
@@ -81,6 +84,9 @@ void Application::onKeyDown( SDL_KeyboardEvent event )
             break;
         case SDL_SCANCODE_2:
             render_mode = CIRCLE_MODE;
+            break;
+        case SDL_SCANCODE_3:
+            render_mode = TRIANGLE_MODE;
             break;
         case SDL_SCANCODE_F:
             fill = !fill;
@@ -129,26 +135,23 @@ void Application::onMouseButtonUp( SDL_MouseButtonEvent event )
         }
         else if (render_mode == TRIANGLE_MODE)
         {
-            switch (points.counter) {
-                case 0:
-                    points.p1.x = mouse_position.x;
-                    points.p1.y = mouse_position.y;
-                    points.counter++;
-                    break;
-                case 1:
-                    points.p2.x = mouse_position.x;
-                    points.p2.y = mouse_position.y;
-                    points.counter ++;
-                    break;
-                case 2:
-                    points.p3.x = mouse_position.x;
-                    points.p3.y = mouse_position.y;
-                    points.counter = 0;
-                    break;
-                default:
-                    points.counter = 0;
-                    break;
-            }
+           switch (points.counter) {
+               case 1:
+                   points.p2.x = mouse_position.x;
+                   points.p2.y = mouse_position.y;
+                   points.counter ++;
+                   break;
+               case 2:
+                   points.p3.x = mouse_position.x;
+                   points.p3.y = mouse_position.y;
+                   points.counter ++;
+                   break;
+               default:
+                   points.p1.x = mouse_position.x;
+                   points.p1.y = mouse_position.y;
+                   points.counter = 1;
+                   break;
+           }
         }
 	}
 }
