@@ -81,6 +81,7 @@ public:
     // primitives (LAB 2)
     void drawLineDDA(int x0, int y0, int x1, int y1, Color & c);
     void drawLineBresenham(int x0, int y0, int x1, int y1, Color & c);
+    void setPixelWithCheck(int x, int y, Color &c);
     void drawCircleAux(int x, int y, int x0, int y0, Color &c, bool fill);
     void drawCircle(int x, int y, int r, Color & c, bool fill);
     void DDAwithTable(int x0, int y0, int x1, int y1, std::vector<sCelda> &table);

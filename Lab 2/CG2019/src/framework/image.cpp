@@ -317,29 +317,35 @@ void Image::drawLineBresenham(int x0, int y0, int x1, int y1, Color & c)
     
 }
 
+void Image::setPixelWithCheck(int x, int y, Color &c)
+{
+    if ( x < width && x >= 0 && y < height && y >= 0)
+        setPixel(x, y, c);
+}
+
 void Image::drawCircleAux(int x, int y, int x0, int y0, Color &c, bool fill)
 {
     if ( fill )
     {
         for (int i = x0 - x; i < x0 + x; i++)
         {
-            setPixel(i, y0 + y, c);
-            setPixel(i, y0 - y, c);
+            setPixelWithCheck(i, y0 + y, c);
+            setPixelWithCheck(i, y0 - y, c);
         }
         for (int i = x0 - y; i < x0 + y; i++)
         {
-            setPixel(i, y0 + x, c);
-            setPixel(i, y0 - x, c);
+            setPixelWithCheck(i, y0 + x, c);
+            setPixelWithCheck(i, y0 - x, c);
         }
     }
-    setPixel(x0 + x, y0 + y, c);
-    setPixel(x0 + x, y0 - y, c);
-    setPixel(x0 - x, y0 + y, c);
-    setPixel(x0 - x, y0 - y, c);
-    setPixel(x0 + y, y0 + x, c);
-    setPixel(x0 + y, y0 - x, c);
-    setPixel(x0 - y, y0 + x, c);
-    setPixel(x0 - y, y0 - x, c);
+    setPixelWithCheck(x0 + x, y0 + y, c);
+    setPixelWithCheck(x0 + x, y0 - y, c);
+    setPixelWithCheck(x0 - x, y0 + y, c);
+    setPixelWithCheck(x0 - x, y0 - y, c);
+    setPixelWithCheck(x0 + y, y0 + x, c);
+    setPixelWithCheck(x0 + y, y0 - x, c);
+    setPixelWithCheck(x0 - y, y0 + x, c);
+    setPixelWithCheck(x0 - y, y0 - x, c);
 }
 
 void Image::drawCircle(int x0, int y0, int r, Color & c, bool fill)
