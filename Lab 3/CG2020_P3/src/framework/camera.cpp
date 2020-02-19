@@ -59,7 +59,7 @@ void Camera::updateProjectionMatrix()
 
 	//ADD YOUR MATRIX PRECOMPUTATIONS HERE
 	//....
-    float f = 1 / tan( N_PI * (fov / 2) / 180);
+    float f = 1 / tan( N_PI * (fov / 2.0) / 180.0);
     
 	//CHANGE THE MATRIX VALUES USING YOUR OWN...
 	projection_matrix.setIdentity();

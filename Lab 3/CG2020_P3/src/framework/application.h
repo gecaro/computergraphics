@@ -20,6 +20,7 @@ public:
 
 	float time;
 	Image framebuffer;
+    FloatImage zFramebuffer;
 
 	//keyboard state
 	const Uint8* keystate;

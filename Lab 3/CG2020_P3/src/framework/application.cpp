@@ -23,6 +23,8 @@ Application::Application(const char* caption, int width, int height)
 	this->keystate = SDL_GetKeyboardState(NULL);
 
 	framebuffer.resize(w, h);
+    zFramebuffer.resize(w, h);
+    zFramebuffer.fill(999999999.0);
 }
 
 //Here we have already GL working, so we can create meshes and textures
@@ -43,7 +45,8 @@ void Application::init(void)
 
 	//load the texture
 	texture = new Image();
-	texture->loadTGA("color.tga");
+    if( !texture->loadTGA("color.tga") )
+        std::cout << "Texture image not found!" << std::endl;
 }
 
 //this function fills the triangle by computing the bounding box of the triangle in screen space and using the barycentric interpolation
@@ -51,10 +54,6 @@ void Application::init(void)
 void fillTriangle(Image& colorbuffer, const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector2& uv0, const Vector2& uv1, const Vector2& uv2, Image* texture = NULL, FloatImage* zbuffer = NULL)
 {
 	//compute triangle bounding box in screen space
-    Color colors[3];
-    colors[0] = Color::RED;
-    colors[1] = Color::GREEN;
-    colors[2] = Color::BLUE;
     Vector3 min_, max_;
 	computeMinMax(p0, p1, p2, min_, max_);
 	//clamp to screen area
@@ -73,8 +72,11 @@ void fillTriangle(Image& colorbuffer, const Vector3& p0, const Vector3& p1, cons
 	float d01 = v0.dot(v1);
 	float d11 = v1.dot(v1);
 	float denom = d00 * d11 - d01 * d01;
-
-	//loop all pixels inside bounding box
+    // get the z of the projected points, used to calculate the interpolated z later on
+    float z1 = p0.z;
+    float z2 = p1.z;
+    float z3 = p2.z;
+    //loop all pixels inside bounding box
 	for (int x = min_.x; x < max_.x; ++x)
 	{
 		#pragma omp parallel for //HACK: this is to execute loop iterations in parallel in multiple cores, should go faster (search openmp in google for more info)
@@ -94,14 +96,18 @@ void fillTriangle(Image& colorbuffer, const Vector3& p0, const Vector3& p1, cons
 				continue; //if it is outside, skip to next
 
 			//here add your code to test occlusions based on the Z of the vertices and the pixel
-			//...
-
+            float zPixel = z1 * u + z2 * v + z3 * w;
+            Vector2 textureCoordInterpolated = uv0 * u + uv1 * v + uv2 * w;
+            if (zPixel <= zbuffer->getPixel(x, y))
+            {
+                zbuffer->setPixel(x, y, zPixel);
+                colorbuffer.setPixel( x, y, texture->getPixel(textureCoordInterpolated.x, textureCoordInterpolated.y) );
+            }
+            
 			//here add your code to compute the color of the pixel
 			//...
-
 			//draw the pixels in the colorbuffer x,y position
-            Color c = colors[ y % 3 ];
-			colorbuffer.setPixel( x, y, c );
+            
 		}
 	}
 }
@@ -123,7 +129,12 @@ void Application::render(Image& framebuffer)
 		Vector2 uv0 = mesh->uvs[i]; //texture coordinate of the vertex (they are normalized, from 0,0 to 1,1)
 		Vector2 uv1 = mesh->uvs[i+1]; //texture coordinate of the vertex (they are normalized, from 0,0 to 1,1)
 		Vector2 uv2 = mesh->uvs[i+2]; //texture coordinate of the vertex (they are normalized, from 0,0 to 1,1)
-
+        uv0.x = uv0.x * texture->width;
+        uv0.y = uv0.y * texture->height;
+        uv1.x = uv1.x * texture->width;
+        uv1.y = uv1.y * texture->height;
+        uv2.x = uv2.x * texture->width;
+        uv2.y = uv2.y * texture->height;
 		//project every point in the mesh to normalized coordinates using the viewprojection_matrix inside camera
 		//you can use: projected_vertex = camera->projectVector(vertex);
         Vector3 projected_vertex_1 = camera->projectVector(v0);
@@ -131,16 +142,20 @@ void Application::render(Image& framebuffer)
         Vector3 projected_vertex_3 = camera->projectVector(v2);
 		//convert from normalized (-1 to +1) to framebuffer coordinates (0..W,0..H)
 		//...
-        projected_vertex_1.x = (projected_vertex_1.x + 1) * window_width /2;
-        projected_vertex_1.y = (projected_vertex_1.y + 1) * window_height /2;
-        projected_vertex_2.x = (projected_vertex_2.x + 1) * window_width /2;
-        projected_vertex_2.y = (projected_vertex_2.y + 1) * window_height /2;
-        projected_vertex_3.x = (projected_vertex_3.x + 1) * window_width /2;
-        projected_vertex_3.y = (projected_vertex_3.y + 1) * window_height /2;
-        
+        projected_vertex_1.x = (projected_vertex_1.x + 1) * window_width /2.0;
+        projected_vertex_1.y = (projected_vertex_1.y + 1) * window_height /2.0;
+        projected_vertex_2.x = (projected_vertex_2.x + 1) * window_width /2.0;
+        projected_vertex_2.y = (projected_vertex_2.y + 1) * window_height /2.0;
+        projected_vertex_3.x = (projected_vertex_3.x + 1) * window_width /2.0;
+        projected_vertex_3.y = (projected_vertex_3.y + 1) * window_height /2.0;
+
+        // set the value of z for each of those pixels in the z-Framebuffer
+        //zFramebuffer.setPixel(projected_vertex_1.x, projected_vertex_1.y, v0.z);
+        //zFramebuffer.setPixel(projected_vertex_2.x, projected_vertex_2.y, v1.z);
+        //zFramebuffer.setPixel(projected_vertex_3.x, projected_vertex_3.y, v2.z);
 		//paint point in framebuffer (using the fillTriangle function)
 		//...
-        fillTriangle(framebuffer, projected_vertex_1, projected_vertex_2, projected_vertex_3, uv0, uv1, uv2);
+        fillTriangle(framebuffer, projected_vertex_1, projected_vertex_2, projected_vertex_3, uv0, uv1, uv2, texture, &zFramebuffer);
 	}
 }
 
@@ -148,14 +163,14 @@ void Application::render(Image& framebuffer)
 void Application::update(double seconds_elapsed)
 {
 	//example to move eye
-	if (keystate[SDL_SCANCODE_LEFT])
-		camera->eye.x -= 15 * seconds_elapsed;
+    if (keystate[SDL_SCANCODE_LEFT])
+        camera->eye.x -= 5 * seconds_elapsed;
 	if (keystate[SDL_SCANCODE_RIGHT])
-		camera->eye.x += 15 * seconds_elapsed;
+		camera->eye.x += 5 * seconds_elapsed;
     if (keystate[SDL_SCANCODE_W])
-        camera->center.y += 5 * seconds_elapsed;
-    if (keystate[SDL_SCANCODE_S])
         camera->center.y -= 5 * seconds_elapsed;
+    if (keystate[SDL_SCANCODE_S])
+        camera->center.y += 5 * seconds_elapsed;
     if (keystate[SDL_SCANCODE_A])
         camera->center.x += 5 * seconds_elapsed;
     if (keystate[SDL_SCANCODE_D])
@@ -168,6 +183,8 @@ void Application::update(double seconds_elapsed)
 	//if we modify the camera fields, then update matrices
 	camera->updateViewMatrix();
 	camera->updateProjectionMatrix();
+    // update this everytime we move the camera
+    zFramebuffer.fill(999999999.0);
 }
 
 //keyboard press event 
