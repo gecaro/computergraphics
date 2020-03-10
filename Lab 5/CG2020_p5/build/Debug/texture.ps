@@ -1,0 +1,41 @@
+//this var comes from the vertex shader
+varying vec2 v_coord;
+varying vec3 v_wNormal;
+varying vec3 v_wPos;
+
+// point where the light is located
+uniform vec3 lightpos;
+// position of the eye
+uniform vec3 eyepos;
+//the texture passed from the application
+uniform sampler2D color_texture;
+// ambient light in the scene 
+uniform vec3 ia;
+// amount of diffuse light 
+uniform vec3 id;
+// amount of specular light 
+uniform vec3 is;
+
+
+void main()
+{
+	//read the pixel RGBA from the texture at the position v_coord
+	vec4 color = texture2D( color_texture, v_coord );
+
+	//here we set up the normal as a color to see them as a debug
+
+	vec3 L = normalize(lightpos - v_wPos);
+	vec3 V = normalize(v_wPos - eyepos);
+	vec3 R = normalize(reflect(L, v_wNormal));
+
+	float LdotN = clamp(dot(L,  v_wNormal), 0.0, 1.0);
+	float RdotV = clamp(dot(R, V), 0.0, 1.0);
+
+	vec3 ambient = ia;
+	vec3 diffuse = LdotN * id;
+	vec3 specular = color.xyz * color.w * pow(RdotV, 13.0) * is;
+	vec3 ip = color.xyz * (ambient + diffuse) + specular;
+
+	//assign the color to the output
+	gl_FragColor = vec4( ip, 1.0 );
+}
