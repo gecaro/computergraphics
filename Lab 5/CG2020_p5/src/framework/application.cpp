@@ -12,6 +12,7 @@ Mesh* mesh = NULL;
 Matrix44 model_matrix;
 Shader* shader = NULL;
 Texture* texture = NULL;
+Texture* normal = NULL;
 Light* light = NULL;
 
 Application::Application(const char* caption, int width, int height)
@@ -50,6 +51,12 @@ void Application::init(void)
 		std::cout << "Texture not found" << std::endl;
 		exit(1);
 	}
+    normal = new Texture();
+    if(!normal->load("lee_normal.tga"))
+    {
+        std::cout << "Texture not found" << std::endl;
+        exit(1);
+    }
 
 	//we load a shader
 	shader = Shader::Get("texture.vs","texture.ps");
@@ -80,6 +87,7 @@ void Application::render(void)
     shader->setVector3("is", light->specular_color);
 
 	shader->setTexture("color_texture", texture, 0 ); //set texture in slot 0
+    shader->setTexture("normal_texture", normal, 1);
 
 	//render the data
 	mesh->render(GL_TRIANGLES);
@@ -98,6 +106,14 @@ void Application::update(double seconds_elapsed)
 	{
 		model_matrix.rotateLocal(seconds_elapsed,Vector3(0,1,0));
 	}
+    if (keystate[SDL_SCANCODE_RIGHT])
+        camera->eye = camera->eye + Vector3(1, 0, 0) * seconds_elapsed * 10.0;
+    else if (keystate[SDL_SCANCODE_LEFT])
+        camera->eye = camera->eye + Vector3(-1, 0, 0) * seconds_elapsed * 10.0;
+    if (keystate[SDL_SCANCODE_UP])
+        camera->eye = camera->eye + Vector3(0, 1, 0) * seconds_elapsed * 10.0;
+    else if (keystate[SDL_SCANCODE_DOWN])
+        camera->eye = camera->eye + Vector3(0, -1, 0) * seconds_elapsed * 10.0;
 }
 
 //keyboard press event 
@@ -115,8 +131,6 @@ void Application::onMouseButtonDown( SDL_MouseButtonEvent event )
 {
 	if (event.button == SDL_BUTTON_LEFT) //left mouse pressed
 	{
-        Vector2 local = Vector2(model_matrix.frontVector().x, model_matrix.frontVector().z) ;
-        model_matrix.rotateLocal(ComputeSignedAngle(local, mouse_delta),Vector3(0,1,0));
 	}
 }
 
