@@ -9,10 +9,14 @@
 
 Camera* camera = NULL;
 Mesh* mesh = NULL;
+Mesh* secondMesh = NULL;
 Matrix44 model_matrix;
+Matrix44 model_matrix_k;
 Shader* shader = NULL;
 Texture* texture = NULL;
+Texture* secondTexture = NULL;
 Texture* normal = NULL;
+Texture* coronaNormal = NULL;
 Light* light = NULL;
 
 Application::Application(const char* caption, int width, int height)
@@ -43,6 +47,9 @@ void Application::init(void)
 	//then we load a mesh
 	mesh = new Mesh();
 	mesh->loadOBJ("lee.obj");
+    
+    secondMesh = new Mesh();
+    secondMesh->loadOBJ("covid.obj");
 
 	//load the texture
 	texture = new Texture();
@@ -57,7 +64,18 @@ void Application::init(void)
         std::cout << "Texture not found" << std::endl;
         exit(1);
     }
-
+    secondTexture = new Texture();
+    if(!secondTexture->load("rocks_2.tga"))
+    {
+        std::cout << "Texture not found" << std::endl;
+        exit(1);
+    }
+    coronaNormal = new Texture();
+    if(!coronaNormal->load("corona_normal.tga"))
+    {
+        std::cout << "Texture not found" << std::endl;
+        exit(1);
+    }
 	//we load a shader
 	shader = Shader::Get("texture.vs","texture.ps");
     light = new Light();
@@ -85,15 +103,20 @@ void Application::render(void)
     shader->setVector3("ia", Vector3(.23, .23, .23));
     shader->setVector3("id", light->diffuse_color);
     shader->setVector3("is", light->specular_color);
-
 	shader->setTexture("color_texture", texture, 0 ); //set texture in slot 0
     shader->setTexture("normal_texture", normal, 1);
-
 	//render the data
 	mesh->render(GL_TRIANGLES);
-
-	//disable shader
-	shader->disable();
+    model_matrix_k.setIdentity();
+    model_matrix_k.translate(10,20,0);
+    shader->setMatrix44("model", model_matrix_k); //upload info to the shader
+    shader->setMatrix44("viewprojection", viewprojection);
+    shader->setVector3("eyepos", camera->eye);
+    shader->setTexture("color_texture", secondTexture, 0 ); //set texture in slot 0
+    shader->setTexture("normal_texture", coronaNormal, 1);
+    secondMesh->render(GL_TRIANGLES);
+    //disable shader
+    shader->disable();
 
 	//swap between front buffer and back buffer
 	SDL_GL_SwapWindow(this->window);
@@ -105,7 +128,7 @@ void Application::update(double seconds_elapsed)
 	if (keystate[SDL_SCANCODE_SPACE])
 	{
 		model_matrix.rotateLocal(seconds_elapsed,Vector3(0,1,0));
-	}
+    }
     if (keystate[SDL_SCANCODE_RIGHT])
         camera->eye = camera->eye + Vector3(1, 0, 0) * seconds_elapsed * 10.0;
     else if (keystate[SDL_SCANCODE_LEFT])
