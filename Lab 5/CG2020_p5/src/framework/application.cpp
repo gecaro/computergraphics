@@ -128,6 +128,7 @@ void Application::update(double seconds_elapsed)
 	if (keystate[SDL_SCANCODE_SPACE])
 	{
 		model_matrix.rotateLocal(seconds_elapsed,Vector3(0,1,0));
+        model_matrix_k.rotateLocal(seconds_elapsed,Vector3(0,1,0));
     }
     if (keystate[SDL_SCANCODE_RIGHT])
         camera->eye = camera->eye + Vector3(1, 0, 0) * seconds_elapsed * 10.0;

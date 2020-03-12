@@ -20,9 +20,6 @@ void main()
 
 	//get the texture coordinates (per vertex) and pass them to the pixel shader
 	v_coord = gl_MultiTexCoord0.xy;
-	vec3 normal = (model * texture2D(normal_texture, v_coord)).xyz;
-	normal = normalize(normal * 2.0 - 1.0); 
-	v_wNormal = normal;
 
 	//project the vertex by the model view projection 
 	gl_Position = viewprojection * vec4(v_wPos,1.0); //output of the vertex shader

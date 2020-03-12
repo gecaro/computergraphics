@@ -10,6 +10,7 @@ uniform vec3 lightpos;
 uniform vec3 eyepos;
 //the texture passed from the application
 uniform sampler2D color_texture;
+// the normal map
 uniform sampler2D normal_texture;
 // ambient light in the scene 
 uniform vec3 ia;
@@ -17,6 +18,7 @@ uniform vec3 ia;
 uniform vec3 id;
 // amount of specular light 
 uniform vec3 is;
+// model matrix
 uniform mat4 model;
 
 
@@ -42,8 +44,8 @@ void main()
 
 	vec3 ambient = ia;
 	vec3 diffuse = LdotN * id;
-	vec3 specular = color.xyz * color.w * pow(RdotV, 13.0) * is;
-	vec3 ip = color.xyz * (ambient + diffuse) + specular;
+	vec3 specular = color.w * pow(RdotV, 13.0) * is;
+	vec3 ip = color.xyz * (ambient + diffuse + specular);
 
 	//assign the color to the output
 	gl_FragColor = vec4( ip, 1.0 );
